@@ -30,6 +30,7 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
+
 // Health check para Render
 app.get('/healthz', (req, res) => {
   res.status(200).json({ 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Árboles Urbanos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-tree"></i> Árboles Urbanos</h1>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#arboles"><i class="fas fa-tree"></i> Árboles</a></li>
+                <li><a href="#cazuelas"><i class="fas fa-seedling"></i> Cazuelas</a></li>
+                <li><a href="#ubicaciones"><i class="fas fa-map-marker-alt"></i> Ubicaciones</a></li>
+                <li><a href="#mantenimientos"><i class="fas fa-tools"></i> Mantenimientos</a></li>
+                <li><a href="#reportes"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title">
+                    <h2 id="page-title">Dashboard</h2>
+                    <p id="page-subtitle">Sistema de gestión de árboles urbanos</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="btn-nuevo">
+                        <i class="fas fa-plus"></i> Nuevo Registro
+                    </button>
+                </div>
+            </header>
+
+            <div class="content" id="content">
+                <!-- El contenido se carga dinámicamente aquí -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para formularios -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Nuevo Registro</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Formulario se carga aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

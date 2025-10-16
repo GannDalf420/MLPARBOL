@@ -341,3 +341,94 @@ body {
 .badge-warning { background: rgba(255, 193, 7, 0.1); color: var(--warning); }
 .badge-danger { background: rgba(244, 67, 54, 0.1); color: var(--danger); }
 .badge-info { background: rgba(33, 150, 243, 0.1); color: var(--info); }
+
+/* Estilos adicionales para las nuevas funcionalidades */
+.table-header {
+    margin-bottom: 1.5rem;
+}
+
+.table-header h3 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.table-header p {
+    color: var(--gray);
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.stat-label {
+    font-weight: 600;
+}
+
+.stat-value {
+    color: var(--primary);
+}
+
+.report-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-top: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.dashboard-sections {
+    display: grid;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.section h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+/* Mejoras para formularios */
+.form-control {
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 800px;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}

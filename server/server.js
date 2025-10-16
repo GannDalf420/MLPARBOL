@@ -37,12 +37,25 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Inicializar base de datos
+// Inicializar base de datos de forma asíncrona
 const { initializeDatabase } = require('./database');
-initializeDatabase();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-  console.log(`📊 Health check disponible en: http://localhost:${PORT}/healthz`);
-  console.log(`🌐 Frontend disponible en: http://localhost:${PORT}/`);
-});
+async function startServer() {
+  try {
+    console.log('🔄 Inicializando base de datos...');
+    await initializeDatabase();
+    console.log('✅ Base de datos inicializada correctamente');
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+      console.log(`📊 Health check disponible en: http://localhost:${PORT}/healthz`);
+      console.log(`🌐 Frontend disponible en: http://localhost:${PORT}/`);
+    });
+  } catch (error) {
+    console.error('❌ Error al inicializar la base de datos:', error);
+    process.exit(1);
+  }
+}
+
+// Iniciar el servidor
+startServer();

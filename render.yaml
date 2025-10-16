@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: arboles-urbanos
+    name: EspaciosVerdesMLP
     env: node
     plan: free
     buildCommand: cd server && npm install
@@ -8,3 +8,4 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+    healthCheckPath: /healthz

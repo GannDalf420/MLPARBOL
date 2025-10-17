@@ -59,3 +59,6 @@ async function startServer() {
 
 // Iniciar el servidor
 startServer();
+
+// Agregar después de las otras rutas
+app.use('/api/uploads', require('./routes/uploads'));

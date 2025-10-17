@@ -2,29 +2,25 @@ class MapaArboles {
     constructor() {
         this.map = null;
         this.markers = [];
-        this.init();
     }
 
-    init() {
-        this.loadMap();
+    init(containerId = 'map') {
+        this.loadMap(containerId);
         this.loadArboles();
     }
 
-    loadMap() {
-        // Inicializar mapa centrado en una ubicación por defecto
-        this.map = L.map('map').setView([-34.6037, -58.3816], 13);
+    loadMap(containerId) {
+        if (this.map) {
+            this.map.remove();
+        }
 
-        // Capa de OpenStreetMap
+        this.map = L.map(containerId).setView([-34.6037, -58.3816], 13);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
 
-        // Capa de satélite (opcional)
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-            attribution: '© Google'
-        }).addTo(this.map);
+        console.log('✅ Mapa cargado correctamente');
     }
 
     async loadArboles() {
@@ -42,28 +38,29 @@ class MapaArboles {
     addArbolesToMap(arboles) {
         arboles.forEach(arbol => {
             if (arbol.coordenadas) {
-                const [lat, lng] = arbol.coordenadas.split(',').map(coord => parseFloat(coord.trim()));
-                
-                const marker = L.marker([lat, lng])
-                    .addTo(this.map)
-                    .bindPopup(this.createPopupContent(arbol));
-                
-                this.markers.push(marker);
+                try {
+                    const [lat, lng] = arbol.coordenadas.split(',').map(coord => parseFloat(coord.trim()));
+                    
+                    const marker = L.marker([lat, lng])
+                        .addTo(this.map)
+                        .bindPopup(this.createPopupContent(arbol));
+                    
+                    this.markers.push(marker);
+                } catch (error) {
+                    console.error('Error procesando coordenadas:', arbol.coordenadas);
+                }
             }
         });
     }
 
     createPopupContent(arbol) {
         return `
-            <div class="popup-content">
-                <h4>${arbol.especie}</h4>
-                <p><strong>Estado:</strong> <span class="badge ${this.getEstadoClass(arbol.estado)}">${arbol.estado}</span></p>
-                <p><strong>Ubicación:</strong> ${arbol.direccion || 'N/A'}</p>
-                <p><strong>Barrio:</strong> ${arbol.barrio || 'N/A'}</p>
-                ${arbol.foto ? `<img src="${arbol.foto}" alt="${arbol.especie}" style="max-width: 200px; margin-top: 10px;">` : ''}
-                <div style="margin-top: 10px;">
-                    <button onclick="sistema.verDetalleArbol(${arbol.id})" class="btn btn-primary btn-sm">Ver Detalles</button>
-                </div>
+            <div class="popup-content" style="min-width: 200px;">
+                <h4 style="margin: 0 0 10px 0; color: #2e7d32;">${arbol.especie}</h4>
+                <p style="margin: 5px 0;"><strong>Estado:</strong> <span class="badge ${this.getEstadoClass(arbol.estado)}">${arbol.estado}</span></p>
+                <p style="margin: 5px 0;"><strong>Ubicación:</strong> ${arbol.direccion || 'N/A'}</p>
+                <p style="margin: 5px 0;"><strong>Barrio:</strong> ${arbol.barrio || 'N/A'}</p>
+                ${arbol.foto ? `<img src="${arbol.foto}" alt="${arbol.especie}" style="max-width: 100%; margin-top: 10px; border-radius: 5px;">` : ''}
             </div>
         `;
     }
@@ -80,15 +77,5 @@ class MapaArboles {
     clearMarkers() {
         this.markers.forEach(marker => this.map.removeLayer(marker));
         this.markers = [];
-    }
-
-    // Filtrar árboles en el mapa
-    filtrarPorEstado(estado) {
-        // Implementar filtrado por estado
-    }
-
-    // Buscar ubicación
-    buscarUbicacion(direccion) {
-        // Implementar geocodificación
     }
 }

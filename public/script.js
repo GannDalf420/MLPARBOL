@@ -39,7 +39,6 @@ class SistemaArbolesUrbanos {
     }
 
     setupNavigation() {
-        // Navegación ya está configurada en setupEventListeners
         console.log('Navegación configurada');
     }
 
@@ -95,18 +94,25 @@ class SistemaArbolesUrbanos {
 
     async loadDashboard() {
         try {
-            const [arboles, stats, mantenimientos] = await Promise.all([
+            const [arboles, mantenimientos] = await Promise.all([
                 this.fetchData('/api/arboles'),
-                this.fetchData('/api/arboles/estadisticas/estados'),
                 this.fetchData('/api/mantenimientos?limit=5')
             ]);
+
+            // Calcular estadísticas básicas
+            const stats = {
+                total: arboles.length,
+                vivos: arboles.filter(a => a.estado === 'Vivo').length,
+                muertos: arboles.filter(a => a.estado === 'Muerto').length,
+                extraidos: arboles.filter(a => a.estado === 'Extraído').length
+            };
 
             const content = `
                 <div class="cards-grid">
                     <div class="card">
                         <div class="card-header">
                             <div>
-                                <div class="card-value">${arboles.length}</div>
+                                <div class="card-value">${stats.total}</div>
                                 <div class="card-label">Total Árboles</div>
                             </div>
                             <div class="card-icon primary">
@@ -118,7 +124,7 @@ class SistemaArbolesUrbanos {
                     <div class="card">
                         <div class="card-header">
                             <div>
-                                <div class="card-value">${stats.find(s => s.estado === 'Vivo')?.cantidad || 0}</div>
+                                <div class="card-value">${stats.vivos}</div>
                                 <div class="card-label">Árboles Vivos</div>
                             </div>
                             <div class="card-icon success">
@@ -130,7 +136,7 @@ class SistemaArbolesUrbanos {
                     <div class="card">
                         <div class="card-header">
                             <div>
-                                <div class="card-value">${stats.find(s => s.estado === 'Muerto')?.cantidad || 0}</div>
+                                <div class="card-value">${stats.muertos}</div>
                                 <div class="card-label">Árboles Muertos</div>
                             </div>
                             <div class="card-icon danger">
@@ -142,7 +148,7 @@ class SistemaArbolesUrbanos {
                     <div class="card">
                         <div class="card-header">
                             <div>
-                                <div class="card-value">${stats.find(s => s.estado === 'Extraído')?.cantidad || 0}</div>
+                                <div class="card-value">${stats.extraidos}</div>
                                 <div class="card-label">Árboles Extraídos</div>
                             </div>
                             <div class="card-icon warning">
@@ -174,7 +180,8 @@ class SistemaArbolesUrbanos {
                                             <td>${m.responsable}</td>
                                         </tr>
                                     `).join('')}
-                                    ${mantenimientos.length === 0 ? '<tr><td colspan="4" style="text-align: center;">No hay mantenimientos registrados</td></tr>' : ''}
+                                    ${mantenimientos.length === 0 ? 
+                                        '<tr><td colspan="4" style="text-align: center;">No hay mantenimientos registrados</td></tr>' : ''}
                                 </tbody>
                             </table>
                         </div>
@@ -220,15 +227,16 @@ class SistemaArbolesUrbanos {
                                     <td>${arbol.direccion || 'N/A'}</td>
                                     <td>
                                         <button class="btn btn-secondary btn-sm" onclick="sistema.editarArbol(${arbol.id})">
-                                            <i class="fas fa-edit"></i> Editar
+                                            <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-danger btn-sm" onclick="sistema.eliminarArbol(${arbol.id})">
-                                            <i class="fas fa-trash"></i> Eliminar
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                             `).join('')}
-                            ${arboles.length === 0 ? '<tr><td colspan="6" style="text-align: center;">No hay árboles registrados</td></tr>' : ''}
+                            ${arboles.length === 0 ? 
+                                '<tr><td colspan="6" style="text-align: center;">No hay árboles registrados</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -259,7 +267,6 @@ class SistemaArbolesUrbanos {
                                 <th>Tamaño</th>
                                 <th>Estado</th>
                                 <th>Ubicación</th>
-                                <th>Árboles Asignados</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -271,7 +278,6 @@ class SistemaArbolesUrbanos {
                                     <td>${cazuela.tamaño}</td>
                                     <td><span class="badge ${this.getEstadoBadgeClass(cazuela.estado)}">${cazuela.estado}</span></td>
                                     <td>${cazuela.direccion || 'N/A'}</td>
-                                    <td>${cazuela.arboles_asignados || 0}</td>
                                     <td>
                                         <button class="btn btn-secondary btn-sm" onclick="sistema.editarCazuela(${cazuela.id})">
                                             <i class="fas fa-edit"></i>
@@ -282,7 +288,8 @@ class SistemaArbolesUrbanos {
                                     </td>
                                 </tr>
                             `).join('')}
-                            ${cazuelas.length === 0 ? '<tr><td colspan="7" style="text-align: center;">No hay cazuelas registradas</td></tr>' : ''}
+                            ${cazuelas.length === 0 ? 
+                                '<tr><td colspan="6" style="text-align: center;">No hay cazuelas registradas</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -332,7 +339,8 @@ class SistemaArbolesUrbanos {
                                     </td>
                                 </tr>
                             `).join('')}
-                            ${ubicaciones.length === 0 ? '<tr><td colspan="5" style="text-align: center;">No hay ubicaciones registradas</td></tr>' : ''}
+                            ${ubicaciones.length === 0 ? 
+                                '<tr><td colspan="5" style="text-align: center;">No hay ubicaciones registradas</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -386,7 +394,8 @@ class SistemaArbolesUrbanos {
                                     </td>
                                 </tr>
                             `).join('')}
-                            ${mantenimientos.length === 0 ? '<tr><td colspan="7" style="text-align: center;">No hay mantenimientos registrados</td></tr>' : ''}
+                            ${mantenimientos.length === 0 ? 
+                                '<tr><td colspan="7" style="text-align: center;">No hay mantenimientos registrados</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -401,10 +410,18 @@ class SistemaArbolesUrbanos {
 
     async loadReportes() {
         try {
-            const [stats, catalogos] = await Promise.all([
-                this.fetchData('/api/arboles/estadisticas/estados'),
+            const [arboles, catalogos] = await Promise.all([
+                this.fetchData('/api/arboles'),
                 this.fetchData('/api/catalogos')
             ]);
+
+            // Calcular estadísticas
+            const stats = {
+                total: arboles.length,
+                vivos: arboles.filter(a => a.estado === 'Vivo').length,
+                muertos: arboles.filter(a => a.estado === 'Muerto').length,
+                extraidos: arboles.filter(a => a.estado === 'Extraído').length
+            };
 
             const content = `
                 <div class="cards-grid">
@@ -413,12 +430,22 @@ class SistemaArbolesUrbanos {
                             <h4>Estadísticas de Árboles</h4>
                         </div>
                         <div class="card-body">
-                            ${stats.map(stat => `
-                                <div class="stat-item">
-                                    <span class="stat-label">${stat.estado}:</span>
-                                    <span class="stat-value">${stat.cantidad} (${stat.porcentaje}%)</span>
-                                </div>
-                            `).join('')}
+                            <div class="stat-item">
+                                <span class="stat-label">Total:</span>
+                                <span class="stat-value">${stats.total}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Vivos:</span>
+                                <span class="stat-value">${stats.vivos} (${stats.total > 0 ? Math.round((stats.vivos/stats.total)*100) : 0}%)</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Muertos:</span>
+                                <span class="stat-value">${stats.muertos} (${stats.total > 0 ? Math.round((stats.muertos/stats.total)*100) : 0}%)</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Extraídos:</span>
+                                <span class="stat-value">${stats.extraidos} (${stats.total > 0 ? Math.round((stats.extraidos/stats.total)*100) : 0}%)</span>
+                            </div>
                         </div>
                     </div>
 
@@ -463,134 +490,142 @@ class SistemaArbolesUrbanos {
     }
 
     async showNewForm() {
-        const forms = {
+        const formHandlers = {
             arboles: () => this.showArbolForm(),
             cazuelas: () => this.showCazuelaForm(),
             ubicaciones: () => this.showUbicacionForm(),
             mantenimientos: () => this.showMantenimientoForm()
         };
 
-        if (forms[this.currentPage]) {
-            await forms[this.currentPage]();
+        if (formHandlers[this.currentPage]) {
+            await formHandlers[this.currentPage]();
         } else {
             this.showError('Función no disponible para esta página');
         }
     }
 
     async showArbolForm(arbol = null) {
-        const cazuelas = await this.fetchData('/api/cazuelas/disponibles');
-        
-        const form = `
-            <form id="arbol-form">
-                <div class="form-group">
-                    <label class="form-label">Especie *</label>
-                    <input type="text" class="form-control" name="especie" value="${arbol?.especie || ''}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Fecha de Plantación</label>
-                    <input type="date" class="form-control" name="fecha_plantacion" value="${arbol?.fecha_plantacion || ''}">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Estado *</label>
-                    <select class="form-control" name="estado" required>
-                        <option value="Vivo" ${arbol?.estado === 'Vivo' ? 'selected' : ''}>Vivo</option>
-                        <option value="Muerto" ${arbol?.estado === 'Muerto' ? 'selected' : ''}>Muerto</option>
-                        <option value="Extraído" ${arbol?.estado === 'Extraído' ? 'selected' : ''}>Extraído</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Cazuela</label>
-                    <select class="form-control" name="cazuela_id">
-                        <option value="">Seleccionar cazuela...</option>
-                        ${cazuelas.map(c => `
-                            <option value="${c.id}" ${arbol?.cazuela_id === c.id ? 'selected' : ''}>
-                                ${c.material} - ${c.tamaño} (${c.direccion})
-                            </option>
-                        `).join('')}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">URL de Foto</label>
-                    <input type="url" class="form-control" name="foto" value="${arbol?.foto || ''}" placeholder="https://ejemplo.com/foto.jpg">
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="sistema.closeModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        ${arbol ? 'Actualizar' : 'Crear'} Árbol
-                    </button>
-                </div>
-            </form>
-        `;
+        try {
+            const cazuelas = await this.fetchData('/api/cazuelas/disponibles');
+            
+            const form = `
+                <form id="arbol-form">
+                    <div class="form-group">
+                        <label class="form-label">Especie *</label>
+                        <input type="text" class="form-control" name="especie" value="${arbol?.especie || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Plantación</label>
+                        <input type="date" class="form-control" name="fecha_plantacion" value="${arbol?.fecha_plantacion || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Estado *</label>
+                        <select class="form-control" name="estado" required>
+                            <option value="Vivo" ${arbol?.estado === 'Vivo' ? 'selected' : ''}>Vivo</option>
+                            <option value="Muerto" ${arbol?.estado === 'Muerto' ? 'selected' : ''}>Muerto</option>
+                            <option value="Extraído" ${arbol?.estado === 'Extraído' ? 'selected' : ''}>Extraído</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Cazuela</label>
+                        <select class="form-control" name="cazuela_id">
+                            <option value="">Seleccionar cazuela...</option>
+                            ${cazuelas.map(c => `
+                                <option value="${c.id}" ${arbol?.cazuela_id === c.id ? 'selected' : ''}>
+                                    ${c.material} - ${c.tamaño} (${c.direccion})
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">URL de Foto</label>
+                        <input type="url" class="form-control" name="foto" value="${arbol?.foto || ''}" placeholder="https://ejemplo.com/foto.jpg">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="sistema.closeModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            ${arbol ? 'Actualizar' : 'Crear'} Árbol
+                        </button>
+                    </div>
+                </form>
+            `;
 
-        this.showModal(arbol ? 'Editar Árbol' : 'Nuevo Árbol', form);
-        
-        document.getElementById('arbol-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.guardarArbol(arbol?.id);
-        });
+            this.showModal(arbol ? 'Editar Árbol' : 'Nuevo Árbol', form);
+            
+            document.getElementById('arbol-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.guardarArbol(arbol?.id);
+            });
+        } catch (error) {
+            this.showError('Error al cargar el formulario: ' + error.message);
+        }
     }
 
     async showCazuelaForm(cazuela = null) {
-        const ubicaciones = await this.fetchData('/api/ubicaciones');
-        
-        const form = `
-            <form id="cazuela-form">
-                <div class="form-group">
-                    <label class="form-label">Material *</label>
-                    <input type="text" class="form-control" name="material" value="${cazuela?.material || ''}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Tamaño *</label>
-                    <input type="text" class="form-control" name="tamaño" value="${cazuela?.tamaño || ''}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Estado *</label>
-                    <select class="form-control" name="estado" required>
-                        <option value="Bueno" ${cazuela?.estado === 'Bueno' ? 'selected' : ''}>Bueno</option>
-                        <option value="Regular" ${cazuela?.estado === 'Regular' ? 'selected' : ''}>Regular</option>
-                        <option value="Malo" ${cazuela?.estado === 'Malo' ? 'selected' : ''}>Malo</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Fecha de Instalación</label>
-                    <input type="date" class="form-control" name="fecha_instalacion" value="${cazuela?.fecha_instalacion || ''}">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Ubicación</label>
-                    <select class="form-control" name="ubicacion_id">
-                        <option value="">Seleccionar ubicación...</option>
-                        ${ubicaciones.map(u => `
-                            <option value="${u.id}" ${cazuela?.ubicacion_id === u.id ? 'selected' : ''}>
-                                ${u.direccion} - ${u.barrio}
-                            </option>
-                        `).join('')}
-                    </select>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="sistema.closeModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        ${cazuela ? 'Actualizar' : 'Crear'} Cazuela
-                    </button>
-                </div>
-            </form>
-        `;
+        try {
+            const ubicaciones = await this.fetchData('/api/ubicaciones');
+            
+            const form = `
+                <form id="cazuela-form">
+                    <div class="form-group">
+                        <label class="form-label">Material *</label>
+                        <input type="text" class="form-control" name="material" value="${cazuela?.material || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tamaño *</label>
+                        <input type="text" class="form-control" name="tamaño" value="${cazuela?.tamaño || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Estado *</label>
+                        <select class="form-control" name="estado" required>
+                            <option value="Bueno" ${cazuela?.estado === 'Bueno' ? 'selected' : ''}>Bueno</option>
+                            <option value="Regular" ${cazuela?.estado === 'Regular' ? 'selected' : ''}>Regular</option>
+                            <option value="Malo" ${cazuela?.estado === 'Malo' ? 'selected' : ''}>Malo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Instalación</label>
+                        <input type="date" class="form-control" name="fecha_instalacion" value="${cazuela?.fecha_instalacion || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Ubicación</label>
+                        <select class="form-control" name="ubicacion_id">
+                            <option value="">Seleccionar ubicación...</option>
+                            ${ubicaciones.map(u => `
+                                <option value="${u.id}" ${cazuela?.ubicacion_id === u.id ? 'selected' : ''}>
+                                    ${u.direccion} - ${u.barrio}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="sistema.closeModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            ${cazuela ? 'Actualizar' : 'Crear'} Cazuela
+                        </button>
+                    </div>
+                </form>
+            `;
 
-        this.showModal(cazuela ? 'Editar Cazuela' : 'Nueva Cazuela', form);
-        
-        document.getElementById('cazuela-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.guardarCazuela(cazuela?.id);
-        });
+            this.showModal(cazuela ? 'Editar Cazuela' : 'Nueva Cazuela', form);
+            
+            document.getElementById('cazuela-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.guardarCazuela(cazuela?.id);
+            });
+        } catch (error) {
+            this.showError('Error al cargar el formulario: ' + error.message);
+        }
     }
 
     async showUbicacionForm(ubicacion = null) {
@@ -629,75 +664,79 @@ class SistemaArbolesUrbanos {
     }
 
     async showMantenimientoForm(mantenimiento = null) {
-        const [arboles, catalogos] = await Promise.all([
-            this.fetchData('/api/arboles'),
-            this.fetchData('/api/catalogos')
-        ]);
-        
-        const form = `
-            <form id="mantenimiento-form">
-                <div class="form-group">
-                    <label class="form-label">Árbol *</label>
-                    <select class="form-control" name="arbol_id" required>
-                        <option value="">Seleccionar árbol...</option>
-                        ${arboles.map(a => `
-                            <option value="${a.id}" ${mantenimiento?.arbol_id === a.id ? 'selected' : ''}>
-                                ${a.especie} - ${a.direccion || 'N/A'}
-                            </option>
-                        `).join('')}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Tipo de Mantenimiento</label>
-                    <select class="form-control" name="tipo_mantenimiento_id">
-                        <option value="">Seleccionar tipo...</option>
-                        ${catalogos.tiposMantenimiento.map(tipo => `
-                            <option value="${tipo.id}" ${mantenimiento?.tipo_mantenimiento_id === tipo.id ? 'selected' : ''}>
-                                ${tipo.nombre}
-                            </option>
-                        `).join('')}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Fecha *</label>
-                    <input type="date" class="form-control" name="fecha" value="${mantenimiento?.fecha || ''}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Responsable *</label>
-                    <input type="text" class="form-control" name="responsable" value="${mantenimiento?.responsable || ''}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Costo</label>
-                    <input type="number" step="0.01" class="form-control" name="costo" value="${mantenimiento?.costo || ''}" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Observaciones</label>
-                    <textarea class="form-control" name="observaciones" rows="3">${mantenimiento?.observaciones || ''}</textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="sistema.closeModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        ${mantenimiento ? 'Actualizar' : 'Registrar'} Mantenimiento
-                    </button>
-                </div>
-            </form>
-        `;
+        try {
+            const [arboles, catalogos] = await Promise.all([
+                this.fetchData('/api/arboles'),
+                this.fetchData('/api/catalogos')
+            ]);
+            
+            const form = `
+                <form id="mantenimiento-form">
+                    <div class="form-group">
+                        <label class="form-label">Árbol *</label>
+                        <select class="form-control" name="arbol_id" required>
+                            <option value="">Seleccionar árbol...</option>
+                            ${arboles.map(a => `
+                                <option value="${a.id}" ${mantenimiento?.arbol_id === a.id ? 'selected' : ''}>
+                                    ${a.especie} - ${a.direccion || 'N/A'}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Mantenimiento</label>
+                        <select class="form-control" name="tipo_mantenimiento_id">
+                            <option value="">Seleccionar tipo...</option>
+                            ${catalogos.tiposMantenimiento.map(tipo => `
+                                <option value="${tipo.id}" ${mantenimiento?.tipo_mantenimiento_id === tipo.id ? 'selected' : ''}>
+                                    ${tipo.nombre}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha *</label>
+                        <input type="date" class="form-control" name="fecha" value="${mantenimiento?.fecha || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Responsable *</label>
+                        <input type="text" class="form-control" name="responsable" value="${mantenimiento?.responsable || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Costo</label>
+                        <input type="number" step="0.01" class="form-control" name="costo" value="${mantenimiento?.costo || ''}" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="3">${mantenimiento?.observaciones || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="sistema.closeModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            ${mantenimiento ? 'Actualizar' : 'Registrar'} Mantenimiento
+                        </button>
+                    </div>
+                </form>
+            `;
 
-        this.showModal(mantenimiento ? 'Editar Mantenimiento' : 'Nuevo Mantenimiento', form);
-        
-        document.getElementById('mantenimiento-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.guardarMantenimiento(mantenimiento?.id);
-        });
+            this.showModal(mantenimiento ? 'Editar Mantenimiento' : 'Nuevo Mantenimiento', form);
+            
+            document.getElementById('mantenimiento-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.guardarMantenimiento(mantenimiento?.id);
+            });
+        } catch (error) {
+            this.showError('Error al cargar el formulario: ' + error.message);
+        }
     }
 
-    // Métodos para guardar datos (simplificados)
+    // Métodos para guardar datos
     async guardarArbol(id = null) {
         try {
             const formData = new FormData(document.getElementById('arbol-form'));
@@ -829,7 +868,7 @@ class SistemaArbolesUrbanos {
         }
     }
 
-    // Métodos de edición (placeholder)
+    // Métodos de edición
     async editarArbol(id) {
         try {
             const arbol = await this.fetchData(`/api/arboles/${id}`);
@@ -866,7 +905,7 @@ class SistemaArbolesUrbanos {
         }
     }
 
-    // Métodos de eliminación (placeholder)
+    // Métodos de eliminación
     async eliminarArbol(id) {
         if (confirm('¿Estás seguro de que quieres eliminar este árbol?')) {
             try {
@@ -941,11 +980,16 @@ class SistemaArbolesUrbanos {
 
     // Métodos utilitarios
     async fetchData(url) {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            throw error;
         }
-        return await response.json();
     }
 
     showModal(title, content) {

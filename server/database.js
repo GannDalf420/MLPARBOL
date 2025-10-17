@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const bcrypt = require('bcryptjs');  // ← NUEVA LÍNEA
 
 const dbPath = path.join(__dirname, 'arboles.db');
 let db;
@@ -25,7 +26,6 @@ function initializeDatabase() {
 
 function crearTablas() {
   return new Promise((resolve, reject) => {
-    // Crear tablas en serie para evitar problemas de dependencias
     const tables = [
       `CREATE TABLE IF NOT EXISTS ubicaciones (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,14 +79,21 @@ function crearTablas() {
         FOREIGN KEY (arbol_id) REFERENCES arboles (id),
         FOREIGN KEY (tipo_mantenimiento_id) REFERENCES tipos_mantenimiento (id),
         FOREIGN KEY (motivo_extraccion_id) REFERENCES motivos_extraccion (id)
+      )`,
+      // NUEVA TABLA: USUARIOS ↓
+      `CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        rol TEXT NOT NULL DEFAULT 'operador',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`
     ];
 
-    // Función para ejecutar las consultas en serie
     const executeQueries = (index = 0) => {
       if (index >= tables.length) {
-        // Todas las tablas creadas, ahora insertar datos del catálogo
-        insertarDatosCatalogo()
+        insertarDatosIniciales()
           .then(resolve)
           .catch(reject);
         return;
@@ -107,9 +114,21 @@ function crearTablas() {
   });
 }
 
+function insertarDatosIniciales() {
+  return new Promise((resolve, reject) => {
+    insertarDatosCatalogo()
+      .then(() => {
+        return insertarUsuarioAdministrador();  // ← NUEVA LÍNEA
+      })
+      .then(() => {
+        resolve();
+      })
+      .catch(reject);
+  });
+}
+
 function insertarDatosCatalogo() {
   return new Promise((resolve, reject) => {
-    // Tipos de mantenimiento
     const tiposMantenimiento = [
       { nombre: 'Poda', descripcion: 'Poda de ramas y formación', frecuencia: 180 },
       { nombre: 'Riego', descripcion: 'Riego manual complementario', frecuencia: 7 },
@@ -119,7 +138,6 @@ function insertarDatosCatalogo() {
       { nombre: 'Extracción', descripcion: 'Extracción del árbol', frecuencia: null }
     ];
 
-    // Motivos de extracción
     const motivosExtraccion = [
       { nombre: 'Árbol muerto', descripcion: 'El árbol ha muerto por causas naturales' },
       { nombre: 'Daño estructural', descripcion: 'Árbol con daños que representan riesgo' },
@@ -145,7 +163,6 @@ function insertarDatosCatalogo() {
       }
     };
 
-    // Insertar tipos de mantenimiento
     tiposMantenimiento.forEach(tipo => {
       db.get("SELECT id FROM tipos_mantenimiento WHERE nombre = ?", [tipo.nombre], (err, row) => {
         if (err) {
@@ -173,7 +190,6 @@ function insertarDatosCatalogo() {
       });
     });
 
-    // Insertar motivos de extracción
     motivosExtraccion.forEach(motivo => {
       db.get("SELECT id FROM motivos_extraccion WHERE nombre = ?", [motivo.nombre], (err, row) => {
         if (err) {
@@ -203,7 +219,39 @@ function insertarDatosCatalogo() {
   });
 }
 
-// Funciones de utilidad para la base de datos
+// NUEVA FUNCIÓN: CREAR USUARIO ADMIN ↓
+function insertarUsuarioAdministrador() {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT COUNT(*) as count FROM usuarios", (err, row) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      if (row.count === 0) {
+        const hashedPassword = bcrypt.hashSync('admin123', 10);
+        
+        db.run(
+          "INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)",
+          ['Administrador', 'admin@arboles.com', hashedPassword, 'admin'],
+          function(err) {
+            if (err) {
+              console.error('Error insertando usuario administrador:', err);
+              reject(err);
+            } else {
+              console.log('✅ Usuario administrador creado: admin@arboles.com / admin123');
+              resolve();
+            }
+          }
+        );
+      } else {
+        console.log('✅ Usuarios ya existen, no se inserta administrador por defecto');
+        resolve();
+      }
+    });
+  });
+}
+
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function(err) {

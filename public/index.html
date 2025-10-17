@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Árboles Urbanos</title>
+    <title>Sistema Avanzado de Gestión de Árboles Urbanos</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -13,6 +17,10 @@
         <nav class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-tree"></i> Árboles Urbanos</h1>
+                <div class="user-info" id="user-info" style="display: none;">
+                    <span id="user-name"></span>
+                    <span id="user-role" class="user-role"></span>
+                </div>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="#dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
@@ -20,7 +28,10 @@
                 <li><a href="#cazuelas"><i class="fas fa-seedling"></i> Cazuelas</a></li>
                 <li><a href="#ubicaciones"><i class="fas fa-map-marker-alt"></i> Ubicaciones</a></li>
                 <li><a href="#mantenimientos"><i class="fas fa-tools"></i> Mantenimientos</a></li>
+                <li><a href="#mapa"><i class="fas fa-map"></i> Mapa Interactivo</a></li>
                 <li><a href="#reportes"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                <li class="login-item" id="login-item"><a href="#login" id="login-link"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a></li>
+                <li class="logout-item" id="logout-item" style="display: none;"><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
             </ul>
         </nav>
 
@@ -29,7 +40,7 @@
             <header class="header">
                 <div class="header-title">
                     <h2 id="page-title">Dashboard</h2>
-                    <p id="page-subtitle">Sistema de gestión de árboles urbanos</p>
+                    <p id="page-subtitle">Sistema avanzado de gestión de árboles urbanos</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn btn-primary" id="btn-nuevo">
@@ -57,8 +68,59 @@
         </div>
     </div>
 
+    <!-- Modal de Login -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Iniciar Sesión</h3>
+                <span class="close" onclick="auth.closeLoginModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </div>
+                </form>
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                    <p style="margin: 0; font-size: 0.9em; color: #666;">
+                        <strong>Usuario de prueba:</strong><br>
+                        Email: admin@arboles.com<br>
+                        Contraseña: admin123
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
+    <script src="map.js"></script>
+    <script src="auth.js"></script>
+    
+    <script>
+        // Inicializar sistemas
+        let sistema;
+        let auth;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            sistema = new SistemaArbolesUrbanos();
+            auth = new SistemaAuth();
+            
+            // Configurar evento para login
+            document.getElementById('login-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                auth.showLoginModal();
+            });
+        });
+    </script>
 </body>
 </html>
